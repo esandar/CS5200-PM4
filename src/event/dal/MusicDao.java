@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import event.model.Music;
 
@@ -114,6 +116,51 @@ public class MusicDao {
 		return null;
 	}
 	
+	
+	/**
+	 * Get the ElementLists record by fetching it from your MySQL instance.
+	 * This runs a SELECT statement and returns a single ElementLists instance.
+	 */
+	public List<Music> getMusicByName(String musicName) throws SQLException {
+		List<Music> musicList = new ArrayList<>();
+		String selectMusic =
+			"SELECT MusicID,MusicName,Artist,Genres " +
+			"FROM Musics " +
+			"WHERE MusicName=?;";
+		Connection connection = null;
+		PreparedStatement selectStmt = null;
+		ResultSet results = null;
+		try {
+			connection = connectionManager.getConnection();
+			selectStmt = connection.prepareStatement(selectMusic);
+			selectStmt.setString(1, musicName);
+			results = selectStmt.executeQuery();
+			if(results.next()) {
+				int musicId = results.getInt("MusicID");
+				String musicname = results.getString("MusicName");
+				String artist = results.getString("Artist");
+				String genres = results.getString("Genres");			
+		
+				Music music = new Music(musicId, musicname, artist, genres);
+				musicList.add(music);
+				return musicList;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(connection != null) {
+				connection.close();
+			}
+			if(selectStmt != null) {
+				selectStmt.close();
+			}
+			if(results != null) {
+				results.close();
+			}
+		}
+		return null;
+	}
 	
 	/**
 	 * Delete the Music instance.
