@@ -233,4 +233,31 @@ public class ReviewsDao {
 			}
 		}
 	}
+	
+	public Reviews updateContent(Reviews review, String newContent) throws SQLException {
+		String updateReview = "UPDATE Reviews SET Content=? WHERE ReviewID=?;";
+		Connection connection = null;
+		PreparedStatement updateStmt = null;
+		try {
+			connection = connectionManager.getConnection();
+			updateStmt = connection.prepareStatement(updateReview);
+			updateStmt.setString(1, newContent);
+			updateStmt.setInt(2, review.getReviewid());
+			updateStmt.executeUpdate();
+
+			// Update the blogPost param before returning to the caller.
+			review.setContent(newContent);
+			return review;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(connection != null) {
+				connection.close();
+			}
+			if(updateStmt != null) {
+				updateStmt.close();
+			}
+		}
+	}
 }

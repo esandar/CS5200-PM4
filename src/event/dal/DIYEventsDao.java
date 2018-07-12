@@ -221,7 +221,7 @@ public class DIYEventsDao {
 		return events;
 	}
 	
-	public DIYEvents getDIYEventsById(int eventId) throws SQLException {
+	public DIYEvents getDIYEventById(int eventId) throws SQLException {
 		String selectevent =
 			"SELECT EventID, Theme, Description, ListID, UserName " +
 			"FROM DIYEvents " +

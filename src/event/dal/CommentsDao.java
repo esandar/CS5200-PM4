@@ -10,46 +10,46 @@ import java.util.ArrayList;
 import java.sql.Date;
 import java.util.List;
 
-public class ReservationsDao {
+public class CommentsDao {
 	protected ConnectionManager connectionManager;
 
-	private static ReservationsDao instance = null;
-	protected ReservationsDao() {
+	private static CommentsDao instance = null;
+	protected CommentsDao() {
 		connectionManager = new ConnectionManager();
 	}
-	public static ReservationsDao getInstance() {
+	public static CommentsDao getInstance() {
 		if(instance == null) {
-			instance = new ReservationsDao();
+			instance = new CommentsDao();
 		}
 		return instance;
 	}
 	
-	public Reservations create(Reservations reservation) throws SQLException {
-		String insertReservation =
-			"INSERT INTO Reservations(EventDate, UserName, PlannerName) " +
+	public Comments create(Comments comment) throws SQLException {
+		String insertComment =
+			"INSERT INTO Comments(Content, UserName, EventID) " +
 			"VALUES(?,?,?);";
 		Connection connection = null;
 		PreparedStatement insertStmt = null;
 		ResultSet resultKey = null;
 		try {
 			connection = connectionManager.getConnection();
-			insertStmt = connection.prepareStatement(insertReservation,
+			insertStmt = connection.prepareStatement(insertComment,
 				Statement.RETURN_GENERATED_KEYS);
-			insertStmt.setDate(1, reservation.getEventdate());
-			insertStmt.setString(2, reservation.getUsername());
-			insertStmt.setString(3, reservation.getPlannername());
+			insertStmt.setString(1, comment.getContent());
+			insertStmt.setString(2, comment.getUsername());
+			insertStmt.setInt(3, comment.getEventID());
 			insertStmt.executeUpdate();
 			
 			// Retrieve the auto-generated key and set it, so it can be used by the caller.
 			resultKey = insertStmt.getGeneratedKeys();
-			int reservationId = -1;
+			int commentId = -1;
 			if(resultKey.next()) {
-				reservationId = resultKey.getInt(1);
+				commentId = resultKey.getInt(1);
 			} else {
 				throw new SQLException("Unable to retrieve auto-generated key.");
 			}
-			reservation.setReservationID(reservationId);
-			return reservation;
+			comment.setCommentid(commentId);
+			return comment;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw e;
@@ -66,31 +66,31 @@ public class ReservationsDao {
 		}
 	}
 	
-	public Reservations getReservationById(int reservationId) throws SQLException {
-		String selectReservation =
+	public Comments getCommentById(int commentId) throws SQLException {
+		String selectComment =
 			"SELECT * " +
-			"FROM Reservations " +
-			"WHERE ReservationID=?;";
+			"FROM Comments " +
+			"WHERE CommentID=?;";
 		Connection connection = null;
 		PreparedStatement selectStmt = null;
 		ResultSet results = null;
 		try {
 			connection = connectionManager.getConnection();
-			selectStmt = connection.prepareStatement(selectReservation);
-			selectStmt.setInt(1, reservationId);
+			selectStmt = connection.prepareStatement(selectComment);
+			selectStmt.setInt(1, commentId);
 			results = selectStmt.executeQuery();
 			DIYersDao diyerDao = DIYersDao.getInstance();
-			PlannersDao plannerDao = PlannersDao.getInstance();
+			DIYEventsDao eventDao = DIYEventsDao.getInstance();
 			if(results.next()) {
-				int resultReservationId = results.getInt("ReservationID");
+				int resultCommentId = results.getInt("CommentID");
 				Date created = results.getDate("CreateTime");
-				Date eventdate = results.getDate("EventDate");
+				String content = results.getString("Content");
 				String userName = results.getString("UserName");
-				String plannerName = results.getString("PlannerName");	
+				int eventid = results.getInt("EventID");	
 				DIYers diyer = diyerDao.getDIYerFromDIYerName(userName);
-				Planners planner = plannerDao.getPlannerFromPlannerName(plannerName);
-				Reservations reservation = new Reservations(resultReservationId, created, eventdate, diyer.getUserName(), planner.getUserName());
-				return reservation;
+				DIYEvents event = eventDao.getDIYEventById(eventid);
+				Comments comment = new Comments(resultCommentId, created, content, diyer.getUserName(), event.getEventID());
+				return comment;
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -109,33 +109,33 @@ public class ReservationsDao {
 		return null;
 	}
 	/**
-	 * Get the all the Reservations for a user.
+	 * Get the all the Comments for a user.
 	 */
-	public List<Reservations> getReservationsByDIYer(String userName) throws SQLException {
-		List<Reservations> reservations = new ArrayList<>();
-		String selectReservations =
+	public List<Comments> getCommentsByDIYer(String userName) throws SQLException {
+		List<Comments> comments = new ArrayList<>();
+		String selectComments =
 			"SELECT * " +
-			"FROM Reservations " + 
+			"FROM Comments " + 
 			"WHERE UserName=?;";
 		Connection connection = null;
 		PreparedStatement selectStmt = null;
 		ResultSet results = null;
 		try {
 			connection = connectionManager.getConnection();
-			selectStmt = connection.prepareStatement(selectReservations);
+			selectStmt = connection.prepareStatement(selectComments);
 			selectStmt.setString(1, userName);
 			results = selectStmt.executeQuery();
 			DIYersDao diyerDao = DIYersDao.getInstance();
-			PlannersDao plannerDao = PlannersDao.getInstance();
+			DIYEventsDao eventDao = DIYEventsDao.getInstance();
 			while(results.next()) {
-				int resultReservationId = results.getInt("ReservationID");
+				int resultCommentId = results.getInt("CommentID");
 				Date created = results.getDate("CreateTime");
-				Date eventdate = results.getDate("EventDate");
-				String plannerName = results.getString("PlannerName");	
+				String content = results.getString("Content");
+				int eventid = results.getInt("EventID");
 				DIYers diyer = diyerDao.getDIYerFromDIYerName(userName);
-				Planners planner = plannerDao.getPlannerFromPlannerName(plannerName);
-				Reservations reservation = new Reservations(resultReservationId, created, eventdate, diyer.getUserName(), planner.getUserName());
-				reservations.add(reservation);
+				DIYEvents event = eventDao.getDIYEventById(eventid);
+				Comments comment = new Comments(resultCommentId, created, content, diyer.getUserName(), event.getEventID());
+				comments.add(comment);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -151,37 +151,37 @@ public class ReservationsDao {
 				results.close();
 			}
 		}
-		return reservations;
+		return comments;
 	}
 	
 	/**
-	 * Get the all the Reservations for a product.
+	 * Get the all the Comments for a product.
 	 */
-	public List<Reservations> getReservationsByPlanner(String plannerName) throws SQLException {
-		List<Reservations> reservations = new ArrayList<>();
-		String selectReservations =
+	public List<Comments> getCommentsByDIYEventID(int eventid) throws SQLException {
+		List<Comments> comments = new ArrayList<>();
+		String selectComments =
 			"SELECT * " +
-			"FROM Reservations " + 
-			"WHERE PlannerName=?;";
+			"FROM Comments " + 
+			"WHERE EventID=?;";
 		Connection connection = null;
 		PreparedStatement selectStmt = null;
 		ResultSet results = null;
 		try {
 			connection = connectionManager.getConnection();
-			selectStmt = connection.prepareStatement(selectReservations);
-			selectStmt.setString(1, plannerName);
+			selectStmt = connection.prepareStatement(selectComments);
+			selectStmt.setInt(1, eventid);
 			results = selectStmt.executeQuery();
 			DIYersDao diyerDao = DIYersDao.getInstance();
-			PlannersDao plannerDao = PlannersDao.getInstance();
+			DIYEventsDao eventDao = DIYEventsDao.getInstance();
 			while(results.next()) {
-				int resultReservationId = results.getInt("ReservationID");
+				int resultCommentId = results.getInt("CommentID");
 				Date created = results.getDate("CreateTime");
-				Date eventdate = results.getDate("EventDate");
+				String content = results.getString("Content");
 				String userName = results.getString("UserName");	
 				DIYers diyer = diyerDao.getDIYerFromDIYerName(userName);
-				Planners planner = plannerDao.getPlannerFromPlannerName(plannerName);
-				Reservations reservation = new Reservations(resultReservationId, created, eventdate, diyer.getUserName(), planner.getUserName());
-				reservations.add(reservation);
+				DIYEvents event = eventDao.getDIYEventById(eventid);
+				Comments comment = new Comments(resultCommentId, created, content, diyer.getUserName(), event.getEventID());
+				comments.add(comment);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -197,21 +197,21 @@ public class ReservationsDao {
 				results.close();
 			}
 		}
-		return reservations;
+		return comments;
 	}
 	
 	/**
-	 * Delete the Reservations instance.
+	 * Delete the Comments instance.
 	 * This runs a DELETE statement.
 	 */
-	public Reservations delete(Reservations reservation) throws SQLException {
-		String deleteReservation = "DELETE FROM Reservations WHERE ReservationID=?;";
+	public Comments delete(Comments comment) throws SQLException {
+		String deleteComment = "DELETE FROM Comments WHERE CommentID=?;";
 		Connection connection = null;
 		PreparedStatement deleteStmt = null;
 		try {
 			connection = connectionManager.getConnection();
-			deleteStmt = connection.prepareStatement(deleteReservation);
-			deleteStmt.setInt(1, reservation.getReservationID());
+			deleteStmt = connection.prepareStatement(deleteComment);
+			deleteStmt.setInt(1, comment.getCommentid());
 			deleteStmt.executeUpdate();
 
 			// Return null so the caller can no longer operate on the Persons instance.
@@ -229,20 +229,20 @@ public class ReservationsDao {
 		}
 	}
 	
-	public Reservations updateEventDate(Reservations reservation, Date date) throws SQLException {
-		String updateReservation = "UPDATE Reservations SET EventDate=? WHERE ReservationID=?;";
+	public Comments updateContent(Comments comment, String newContent) throws SQLException {
+		String updateComment = "UPDATE Comments SET Content=? WHERE CommentID=?;";
 		Connection connection = null;
 		PreparedStatement updateStmt = null;
 		try {
 			connection = connectionManager.getConnection();
-			updateStmt = connection.prepareStatement(updateReservation);
-			updateStmt.setDate(1, date);
-			updateStmt.setInt(2, reservation.getReservationID());
+			updateStmt = connection.prepareStatement(updateComment);
+			updateStmt.setString(1, newContent);
+			updateStmt.setInt(2, comment.getCommentid());
 			updateStmt.executeUpdate();
 
 			// Update the blogPost param before returning to the caller.
-			reservation.setEventdate(date);
-			return reservation;
+			comment.setContent(newContent);
+			return comment;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw e;
