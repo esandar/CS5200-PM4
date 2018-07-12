@@ -4,7 +4,6 @@ import event.model.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class PersonsDao {
@@ -48,42 +47,6 @@ public class PersonsDao {
 				insertStmt.close();
 			}
 		}
-	}
-	
-	public Persons getPersonFromUserName(String userName) throws SQLException {
-		String selectPerson = "SELECT UserName,Password,Email FROM Persons WHERE UserName=?;";
-		Connection connection = null;
-		PreparedStatement selectStmt = null;
-		ResultSet results = null;
-		try {
-			connection = connectionManager.getConnection();
-			selectStmt = connection.prepareStatement(selectPerson);
-			selectStmt.setString(1, userName);
-
-			results = selectStmt.executeQuery();
-
-			if(results.next()) {
-				String resultUserName = results.getString("UserName");
-				String password = results.getString("Password");
-				String email = results.getString("Email");
-				Persons person = new Persons(resultUserName, password, email);
-				return person;
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw e;
-		} finally {
-			if(connection != null) {
-				connection.close();
-			}
-			if(selectStmt != null) {
-				selectStmt.close();
-			}
-			if(results != null) {
-				results.close();
-			}
-		}
-		return null;
 	}
 	
 	public Persons updatePassword (Persons person, String newPassword) throws SQLException {
