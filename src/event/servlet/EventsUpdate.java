@@ -36,7 +36,7 @@ public class EventsUpdate extends HttpServlet{
 		} else {
 			DIYEvents diyEvents;
 			try {
-				diyEvents = diyEventsDao.getDIYEventsById(eventId);
+				diyEvents = diyEventsDao.getDIYEventById(eventId);
 				if (diyEvents == null) {
 					messages.put("success", "Event ID does not exist. No update to perform.");
 				} else {
@@ -69,7 +69,7 @@ public class EventsUpdate extends HttpServlet{
 			messages.put("success", "Invalid Event Id");
 		} else {
 			try {
-				DIYEvents diyEvents = diyEventsDao.getDIYEventsById(eventId);
+				DIYEvents diyEvents = diyEventsDao.getDIYEventById(eventId);
 				if (diyEvents == null) {
 					messages.put("success", "Event ID does not exist. No update to perform.");
 				} else {

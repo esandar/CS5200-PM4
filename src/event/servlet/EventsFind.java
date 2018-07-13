@@ -35,7 +35,7 @@ public class EventsFind extends HttpServlet{
 			messages.put("success", "Please enter a valid name.");
 		} else {
 			try {
-				Users user = new Users(userName);
+				DIYers user = new DIYers(userName);
 				events = diyEventsDao.getDIYEventsForUser(user);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
@@ -62,7 +62,7 @@ public class EventsFind extends HttpServlet{
 			messages.put("success", "Please enter a valid name.");
 		} else {
 			try {
-				Users user = new Users(userName);
+				DIYers user = new DIYers(userName);
 				events = diyEventsDao.getDIYEventsForUser(user);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
