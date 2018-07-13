@@ -10,52 +10,52 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DIYEventsDao {
+public class EventProductsDao {
 	//dao method
 	protected ConnectionManager connectionManager;
 
-	private static DIYEventsDao instance = null;
-	protected DIYEventsDao() {
+	private static EventProductsDao instance = null;
+	protected EventProductsDao() {
 		connectionManager = new ConnectionManager();
 	}
-	public static DIYEventsDao getInstance() {
+	public static EventProductsDao getInstance() {
 		if(instance == null) {
-			instance = new DIYEventsDao();
+			instance = new EventProductsDao();
 		}
 		return instance;
 	}
 
-	public DIYEvents create(DIYEvents event) throws SQLException {
-		String insertDIYEvents =
-			"INSERT INTO DIYEvents(Theme, Description, ListID, UserName) " +
-			"VALUES(?,?,?,?);";
+	public EventProducts create(EventProducts product) throws SQLException {
+		String insertEventProducts =
+			"INSERT INTO EventProducts(Theme, Size, PriceRange, Description, PlannerName) " +
+			"VALUES(?,?,?,?,?);";
 		Connection connection = null;
 		PreparedStatement insertStmt = null;
 		ResultSet resultKey = null;
 		try {
 			connection = connectionManager.getConnection();
 			// BlogPosts has an auto-generated key. So we want to retrieve that key.
-			insertStmt = connection.prepareStatement(insertDIYEvents,
+			insertStmt = connection.prepareStatement(insertEventProducts,
 				Statement.RETURN_GENERATED_KEYS);
-			insertStmt.setString(1, event.getTheme().name());
-			// Note: for the sake of simplicity, just set Picture to null for now.
-			insertStmt.setString(2, event.getDescription());
-			insertStmt.setInt(3, event.getListID());
-			insertStmt.setString(4, event.getUsername());
+			insertStmt.setString(1, product.getTheme().name());
+			insertStmt.setInt(2, product.getSize());
+			insertStmt.setString(3, product.getPricerange().name());
+			insertStmt.setString(4, product.getDescription());
+			insertStmt.setString(5, product.getPlannerName());
 			insertStmt.executeUpdate();
 			
 			// Retrieve the auto-generated key and set it, so it can be used by the caller.
 			// For more details, see:
 			// http://dev.mysql.com/doc/connector-j/en/connector-j-usagenotes-last-insert-id.html
 			resultKey = insertStmt.getGeneratedKeys();
-			int eventId = -1;
+			int productId = -1;
 			if(resultKey.next()) {
-				eventId = resultKey.getInt(1);
+				productId = resultKey.getInt(1);
 			} else {
 				throw new SQLException("Unable to retrieve auto-generated key.");
 			}
-			event.setEventID(eventId);
-			return event;
+			product.setProductID(productId);
+			return product;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw e;
@@ -73,23 +73,23 @@ public class DIYEventsDao {
 	}
 
 	/**
-	 * Update the content of the DIYEvent instance.
+	 * Update the content of the EventProduct instance.
 	 * This runs a UPDATE statement.
 	 */
-	public DIYEvents updateDescription(DIYEvents event, String newDescription) throws SQLException {
-		String updateEvent = "UPDATE DIYEvents SET Description=? WHERE EventID=?;";
+	public EventProducts updateDescription(EventProducts product, String newDescription) throws SQLException {
+		String updateProduct = "UPDATE EventProducts SET Description=? WHERE ProductID=?;";
 		Connection connection = null;
 		PreparedStatement updateStmt = null;
 		try {
 			connection = connectionManager.getConnection();
-			updateStmt = connection.prepareStatement(updateEvent);
+			updateStmt = connection.prepareStatement(updateProduct);
 			updateStmt.setString(1, newDescription);
-			updateStmt.setInt(2, event.getEventID());
+			updateStmt.setInt(2, product.getProductID());
 			updateStmt.executeUpdate();
 
 			// Update the blogPost param before returning to the caller.
-			event.setDescription(newDescription);
-			return event;
+			product.setDescription(newDescription);
+			return product;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw e;
@@ -107,17 +107,17 @@ public class DIYEventsDao {
 	 * Delete the BlogPosts instance.
 	 * This runs a DELETE statement.
 	 */
-	public DIYEvents delete(DIYEvents event) throws SQLException {
+	public EventProducts delete(EventProducts product) throws SQLException {
 		// Note: BlogComments has a fk constraint on BlogPosts with the reference option
 		// ON DELETE CASCADE. So this delete operation will delete all the referencing
 		// BlogComments.
-		String deleteEvent = "DELETE FROM DIYEvents WHERE EventID=?;";
+		String deleteEvent = "DELETE FROM EventProducts WHERE ProductID=?;";
 		Connection connection = null;
 		PreparedStatement deleteStmt = null;
 		try {
 			connection = connectionManager.getConnection();
 			deleteStmt = connection.prepareStatement(deleteEvent);
-			deleteStmt.setInt(1, event.getEventID());
+			deleteStmt.setInt(1, product.getProductID());
 			deleteStmt.executeUpdate();
 
 			// Return null so the caller can no longer operate on the BlogPosts instance.
@@ -136,30 +136,31 @@ public class DIYEventsDao {
 	}
 
 	/**
-	 * Get the all the Event for a DIYer.
+	 * Get the all the Event for a Planner.
 	 */
-	public List<DIYEvents> getDIYEventsForUser(DIYers user) throws SQLException {
-		List<DIYEvents> events = new ArrayList<DIYEvents>();
-		String selectevents =
-			"SELECT EventID, Theme, Description, ListID, UserName " +
-			"FROM DIYEvents " +
+	public List<EventProducts> getEventProductsForPlanner(Planners user) throws SQLException {
+		List<EventProducts> products = new ArrayList<EventProducts>();
+		String selectproducts =
+			"SELECT ProductID, Theme, Size, PriceRange, Description, PlannerName" +
+			"FROM EventProducts " +
 			"WHERE UserName=?;";
 		Connection connection = null;
 		PreparedStatement selectStmt = null;
 		ResultSet results = null;
 		try {
 			connection = connectionManager.getConnection();
-			selectStmt = connection.prepareStatement(selectevents);
+			selectStmt = connection.prepareStatement(selectproducts);
 			selectStmt.setString(1, user.getUserName());
 			results = selectStmt.executeQuery();
 			while(results.next()) {
-				int EventId = results.getInt("EventID");
-				DIYEvents.Theme theme = DIYEvents.Theme.valueOf(results.getString("Theme"));
+				int ProductId = results.getInt("ProductID");
+				EventProducts.Theme theme = EventProducts.Theme.valueOf(results.getString("Theme"));
+				int size = results.getInt("Size");
+				EventProducts.PriceRange pr = EventProducts.PriceRange.valueOf(results.getString("PriceRange"));
 				String discription = results.getString("Description");
-				int ListID = results.getInt("ListID");
-				String username = results.getString("UserName");
-				DIYEvents event = new DIYEvents(EventId, theme, discription, ListID, username);
-				events.add(event);
+				String username = results.getString("PlannerName");
+				EventProducts product = new EventProducts(ProductId, theme, size, pr, discription, username);
+				products.add(product);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -175,34 +176,35 @@ public class DIYEventsDao {
 				results.close();
 			}
 		}
-		return events;
+		return products;
 	}
-	
+
 	/**
-	 * Get the all the Event for a Theme.
+	 * Get the all the Event for a theme.
 	 */
-	public List<DIYEvents> getDIYEventsForTheme(DIYEvents.Theme theme) throws SQLException {
-		List<DIYEvents> events = new ArrayList<DIYEvents>();
-		String selectevents =
-			"SELECT EventID, Theme, Description, ListID, UserName " +
-			"FROM DIYEvents " +
+	public List<EventProducts> getEventProductsForPlanner(EventProducts.Theme theme) throws SQLException {
+		List<EventProducts> products = new ArrayList<EventProducts>();
+		String selectproducts =
+			"SELECT ProductID, Theme, Size, PriceRange, Description, PlannerName" +
+			"FROM EventProducts " +
 			"WHERE Theme=?;";
 		Connection connection = null;
 		PreparedStatement selectStmt = null;
 		ResultSet results = null;
 		try {
 			connection = connectionManager.getConnection();
-			selectStmt = connection.prepareStatement(selectevents);
+			selectStmt = connection.prepareStatement(selectproducts);
 			selectStmt.setString(1, theme.name());
 			results = selectStmt.executeQuery();
 			while(results.next()) {
-				int EventId = results.getInt("EventID");
-				DIYEvents.Theme theme1 = DIYEvents.Theme.valueOf(results.getString("Theme"));
+				int ProductId = results.getInt("ProductID");
+				EventProducts.Theme theme1 = EventProducts.Theme.valueOf(results.getString("Theme"));
+				int size = results.getInt("Size");
+				EventProducts.PriceRange pr = EventProducts.PriceRange.valueOf(results.getString("PriceRange"));
 				String discription = results.getString("Description");
-				int ListID = results.getInt("ListID");
-				String username = results.getString("UserName");
-				DIYEvents event = new DIYEvents(EventId, theme1, discription, ListID, username);
-				events.add(event);
+				String username = results.getString("PlannerName");
+				EventProducts product = new EventProducts(ProductId, theme1, size, pr, discription, username);
+				products.add(product);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -218,30 +220,31 @@ public class DIYEventsDao {
 				results.close();
 			}
 		}
-		return events;
+		return products;
 	}
 	
-	public DIYEvents getDIYEventById(int eventId) throws SQLException {
-		String selectevent =
-			"SELECT EventID, Theme, Description, ListID, UserName " +
-			"FROM DIYEvents " +
-			"WHERE EventID=?;";
+	public EventProducts getEventProductsById(int productid) throws SQLException {
+		String selectproduct =
+			"SELECT ProductID, Theme, Size, PriceRange, Description, PlannerName" +
+			"FROM EventProducts " +
+			"WHERE ProductID=?;";
 		Connection connection = null;
 		PreparedStatement selectStmt = null;
 		ResultSet results = null;
 		try {
 			connection = connectionManager.getConnection();
-			selectStmt = connection.prepareStatement(selectevent);
-			selectStmt.setInt(1, eventId);
+			selectStmt = connection.prepareStatement(selectproduct);
+			selectStmt.setInt(1, productid);
 			results = selectStmt.executeQuery();
 			while(results.next()) {
-				int EventId = results.getInt("EventID");
-				DIYEvents.Theme theme1 = DIYEvents.Theme.valueOf(results.getString("Theme"));
+				int ProductId = results.getInt("ProductID");
+				EventProducts.Theme theme = EventProducts.Theme.valueOf(results.getString("Theme"));
+				int size = results.getInt("Size");
+				EventProducts.PriceRange pr = EventProducts.PriceRange.valueOf(results.getString("PriceRange"));
 				String discription = results.getString("Description");
-				int ListID = results.getInt("ListID");
-				String username = results.getString("UserName");
-				DIYEvents event = new DIYEvents(EventId, theme1, discription, ListID, username);
-				return event;
+				String username = results.getString("PlannerName");
+				EventProducts product = new EventProducts(ProductId, theme, size, pr, discription, username);
+				return product;
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
