@@ -177,5 +177,86 @@ public class DIYEventsDao {
 		}
 		return events;
 	}
-
+	
+	/**
+	 * Get the all the Event for a Theme.
+	 */
+	public List<DIYEvents> getDIYEventsForTheme(DIYEvents.Theme theme) throws SQLException {
+		List<DIYEvents> events = new ArrayList<DIYEvents>();
+		String selectevents =
+			"SELECT EventID, Theme, Description, ListID, UserName " +
+			"FROM DIYEvents " +
+			"WHERE Theme=?;";
+		Connection connection = null;
+		PreparedStatement selectStmt = null;
+		ResultSet results = null;
+		try {
+			connection = connectionManager.getConnection();
+			selectStmt = connection.prepareStatement(selectevents);
+			selectStmt.setString(1, theme.name());
+			results = selectStmt.executeQuery();
+			while(results.next()) {
+				int EventId = results.getInt("EventID");
+				DIYEvents.Theme theme1 = DIYEvents.Theme.valueOf(results.getString("Theme"));
+				String discription = results.getString("Description");
+				int ListID = results.getInt("ListID");
+				String username = results.getString("UserName");
+				DIYEvents event = new DIYEvents(EventId, theme1, discription, ListID, username);
+				events.add(event);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(connection != null) {
+				connection.close();
+			}
+			if(selectStmt != null) {
+				selectStmt.close();
+			}
+			if(results != null) {
+				results.close();
+			}
+		}
+		return events;
+	}
+	
+	public DIYEvents getDIYEventById(int eventId) throws SQLException {
+		String selectevent =
+			"SELECT EventID, Theme, Description, ListID, UserName " +
+			"FROM DIYEvents " +
+			"WHERE EventID=?;";
+		Connection connection = null;
+		PreparedStatement selectStmt = null;
+		ResultSet results = null;
+		try {
+			connection = connectionManager.getConnection();
+			selectStmt = connection.prepareStatement(selectevent);
+			selectStmt.setInt(1, eventId);
+			results = selectStmt.executeQuery();
+			while(results.next()) {
+				int EventId = results.getInt("EventID");
+				DIYEvents.Theme theme1 = DIYEvents.Theme.valueOf(results.getString("Theme"));
+				String discription = results.getString("Description");
+				int ListID = results.getInt("ListID");
+				String username = results.getString("UserName");
+				DIYEvents event = new DIYEvents(EventId, theme1, discription, ListID, username);
+				return event;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(connection != null) {
+				connection.close();
+			}
+			if(selectStmt != null) {
+				selectStmt.close();
+			}
+			if(results != null) {
+				results.close();
+			}
+		}
+		return null;
+	}
 }

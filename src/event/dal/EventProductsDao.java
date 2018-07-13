@@ -136,7 +136,7 @@ public class EventProductsDao {
 	}
 
 	/**
-	 * Get the all the Event for a DIYer.
+	 * Get the all the Event for a Planner.
 	 */
 	public List<EventProducts> getEventProductsForPlanner(Planners user) throws SQLException {
 		List<EventProducts> products = new ArrayList<EventProducts>();
@@ -179,4 +179,87 @@ public class EventProductsDao {
 		return products;
 	}
 
+	/**
+	 * Get the all the Event for a theme.
+	 */
+	public List<EventProducts> getEventProductsForPlanner(EventProducts.Theme theme) throws SQLException {
+		List<EventProducts> products = new ArrayList<EventProducts>();
+		String selectproducts =
+			"SELECT ProductID, Theme, Size, PriceRange, Description, PlannerName" +
+			"FROM EventProducts " +
+			"WHERE Theme=?;";
+		Connection connection = null;
+		PreparedStatement selectStmt = null;
+		ResultSet results = null;
+		try {
+			connection = connectionManager.getConnection();
+			selectStmt = connection.prepareStatement(selectproducts);
+			selectStmt.setString(1, theme.name());
+			results = selectStmt.executeQuery();
+			while(results.next()) {
+				int ProductId = results.getInt("ProductID");
+				EventProducts.Theme theme1 = EventProducts.Theme.valueOf(results.getString("Theme"));
+				int size = results.getInt("Size");
+				EventProducts.PriceRange pr = EventProducts.PriceRange.valueOf(results.getString("PriceRange"));
+				String discription = results.getString("Description");
+				String username = results.getString("PlannerName");
+				EventProducts product = new EventProducts(ProductId, theme1, size, pr, discription, username);
+				products.add(product);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(connection != null) {
+				connection.close();
+			}
+			if(selectStmt != null) {
+				selectStmt.close();
+			}
+			if(results != null) {
+				results.close();
+			}
+		}
+		return products;
+	}
+	
+	public EventProducts getEventProductsById(int productid) throws SQLException {
+		String selectproduct =
+			"SELECT ProductID, Theme, Size, PriceRange, Description, PlannerName" +
+			"FROM EventProducts " +
+			"WHERE ProductID=?;";
+		Connection connection = null;
+		PreparedStatement selectStmt = null;
+		ResultSet results = null;
+		try {
+			connection = connectionManager.getConnection();
+			selectStmt = connection.prepareStatement(selectproduct);
+			selectStmt.setInt(1, productid);
+			results = selectStmt.executeQuery();
+			while(results.next()) {
+				int ProductId = results.getInt("ProductID");
+				EventProducts.Theme theme = EventProducts.Theme.valueOf(results.getString("Theme"));
+				int size = results.getInt("Size");
+				EventProducts.PriceRange pr = EventProducts.PriceRange.valueOf(results.getString("PriceRange"));
+				String discription = results.getString("Description");
+				String username = results.getString("PlannerName");
+				EventProducts product = new EventProducts(ProductId, theme, size, pr, discription, username);
+				return product;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(connection != null) {
+				connection.close();
+			}
+			if(selectStmt != null) {
+				selectStmt.close();
+			}
+			if(results != null) {
+				results.close();
+			}
+		}
+		return null;
+	}
 }
