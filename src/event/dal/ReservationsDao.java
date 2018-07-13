@@ -6,8 +6,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.sql.Date;
+import java.util.Date;
 import java.util.List;
 
 public class ReservationsDao {
@@ -35,7 +36,7 @@ public class ReservationsDao {
 			connection = connectionManager.getConnection();
 			insertStmt = connection.prepareStatement(insertReservation,
 				Statement.RETURN_GENERATED_KEYS);
-			insertStmt.setDate(1, reservation.getEventdate());
+			insertStmt.setTimestamp(1, new Timestamp(reservation.getEventdate().getTime()));
 			insertStmt.setString(2, reservation.getUsername());
 			insertStmt.setString(3, reservation.getPlannername());
 			insertStmt.executeUpdate();
@@ -236,7 +237,7 @@ public class ReservationsDao {
 		try {
 			connection = connectionManager.getConnection();
 			updateStmt = connection.prepareStatement(updateReservation);
-			updateStmt.setDate(1, date);
+			updateStmt.setTimestamp(1, new Timestamp (date.getTime()));
 			updateStmt.setInt(2, reservation.getReservationID());
 			updateStmt.executeUpdate();
 

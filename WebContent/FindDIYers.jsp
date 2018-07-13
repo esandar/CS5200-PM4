@@ -33,6 +33,7 @@
                 <th>LastName</th>
                 <th>DIYEvents</th>
                 <th>Update Phone</th>
+                <th>Reservations</th>
                 <th>Delete User</th>
 			</tr>
 			<c:forEach items="${diyers}" var="diyer">
@@ -42,6 +43,7 @@
 					 <td><c:out value="${diyer.getLastName()}" /></td>
 					 <td><a href="diyevents?username=<c:out value="${diyer.getUserName()}" />"></a></td>
 					 <td><a href="updatephone?username=<c:out value="${diyer.getUserName()}" />">Update</a></td>
+					 <td><a href="diyerreservation?diyername=<c:out value="${diyer.getUserName()}" />">Reservations</a>
 					 <td><a href="diyerdelete?username=<c:out value="${diyer.getUserName()}"/>">Delete</a></td>
 				</tr>
 			</c:forEach>

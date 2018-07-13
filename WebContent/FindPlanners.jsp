@@ -32,7 +32,7 @@
 				<th>Company</th>
 				<th>Email</th>
 				<th>Phone</th>
-				<th>Update Phone</th>
+				<th>Make Reservation</th>
 			</tr>
 			<c:forEach items="${planners}" var="planner" >
 				<tr>
@@ -40,7 +40,8 @@
 					<td><c:out value="${planner.getCompany()}" /></td>
 					<td><c:out value="${planner.getEmail()}" /></td>
 					<td><c:out value="${planner.getPhone()}" /></td>
-					<td><a href="updatephone?username=<c:out value="${planner.getUserName()}" />">Update</a></td>
+					<td><a href="makereservation?plannername=<c:out value="${planner.getUserName()}" />">Reserve</a></td>
+					
 				</tr>
 			</c:forEach>
 		</table>

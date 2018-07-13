@@ -47,5 +47,6 @@
 	<div id="plannerSignUp"><a href="plannersignup">Sign Up as Planner</a></div>
 	<div id="findDIYers"><a href="finddiyers">Find a DIYer</a></div>
 	<div id="findPlanners"><a href="findplanners">Find a Planner</a></div>
+	<div id="createEvent"><a bref="createevent">Create an Event</a></div>
 </body>
 </html>

@@ -1,6 +1,6 @@
 package event.model;
 
-import java.sql.Date;
+import java.util.Date;
 
 public class Reservations {
 	protected int reservationID;
@@ -10,13 +10,23 @@ public class Reservations {
 	protected String plannername;
 	
 	public Reservations(int reservationID, Date created, Date eventdate, String username, String plannername) {
-		super();
 		this.reservationID = reservationID;
 		this.created = created;
 		this.eventdate = eventdate;
 		this.username = username;
 		this.plannername = plannername;
 	}
+	
+	public Reservations(int reservationID) {
+		this.reservationID = reservationID;
+	}
+	
+	public Reservations(Date created, Date eventdate, String username, String plannername) {
+		this.created = created;
+		this.eventdate = eventdate;
+		this.username = username;
+		this.plannername = plannername;
+	} 
 
 	public int getReservationID() {
 		return reservationID;
