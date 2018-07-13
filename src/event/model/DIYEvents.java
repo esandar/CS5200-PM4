@@ -20,6 +20,12 @@ public class DIYEvents {
 		this.username = username;
 	}
 
+	public DIYEvents(int eventId) {
+		// TODO Auto-generated constructor stub
+		super();
+		this.eventID = eventId;
+	}
+
 	public int getEventID() {
 		return eventID;
 	}

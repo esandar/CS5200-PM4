@@ -95,9 +95,8 @@ public class UsersDao extends PersonsDao{
 	
 	public List<Users> getUsersFromFirstName(String firstName) throws SQLException {
 		List<Users> users = new ArrayList<Users>();
-		PersonsDao personsDao = PersonsDao.getInstance();
 		String selectUsers =
-			"SELECT UserName,FirstName,LastName,Phone FROM Users WHERE FirstName=?;";
+			"SELECT UserName,Password,Email,FirstName,LastName,Phone FROM Users WHERE FirstName=?;";
 		Connection connection = null;
 		PreparedStatement selectStmt = null;
 		ResultSet results = null;
@@ -108,9 +107,8 @@ public class UsersDao extends PersonsDao{
 			results = selectStmt.executeQuery();
 			while(results.next()) {
 				String userName = results.getString("UserName");
-				Persons person = personsDao.getPersonFromUserName(userName);
-				String password = person.getPassWord();
-				String email = person.getEmail();
+				String password = results.getString("Password");
+				String email = results.getString("Email");
 				String resultFirstName = results.getString("FirstName");
 				String lastName = results.getString("LastName");
 				String phone = results.getString("Phone");
